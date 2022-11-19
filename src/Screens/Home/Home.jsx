@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 
 import useAPI from "../../Services/APIs/Common/useAPI";
-import Person from "../../Services/APIs/Persons/Persons";
+import Despesa from "../../Services/APIs/Despesas/Despesas";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -28,24 +28,24 @@ export default function Home() {
   
   const [cards, setCards] = useState([]);
   const [isConfirmRemoveDialogOpen, setIsConfirmRemoveDialogOpen] = useState(false)
-  const [personChose, setPersonChose] = useState(null)
+  const [DespesaChose, setDespesaChose] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
-  const getPersonAPI = useAPI(Person.getPersons);
-  const deletePersonAPI = useAPI(Person.deletePersons);
+  const getDespesaAPI = useAPI(Despesa.getDespesas);
+  const deleteDespesaAPI = useAPI(Despesa.deleteDespesas);
   const navigate = useNavigate();
 
-  const goToDetail = (person) => {
-    navigate("/detail/" + person.CPF, {
+  const goToCadastro = (Despesa) => {
+    navigate("/cadastro/" + Despesa.CPF, {
       state: {
-        person: JSON.stringify(person)
+        Despesa: JSON.stringify(Despesa)
       },
     });
   };
 
   const goToAdd = () => {
-    navigate("/detail/-1", {
+    navigate("/cadastro/-1", {
       state: {
-        person: "{}",
+        Despesa: "{}",
       },
     });
   };
@@ -54,72 +54,72 @@ export default function Home() {
     context.onMakeLogoff();
   };
 
-  const confirmRemovePerson = (person) => {
+  const confirmRemoveDespesa = (Despesa) => {
     setIsConfirmRemoveDialogOpen(true);
-    setPersonChose(person);
+    setDespesaChose(Despesa);
   };
 
-  const deletePerson = (isConfirmed) => {
+  const deleteDespesa = (isConfirmed) => {
     setIsConfirmRemoveDialogOpen(false);
     if(!isConfirmed){      
-      setPersonChose(null)
+      setDespesaChose(null)
     } else {
       setIsLoading(true)
-      deletePersonAPI
-        .requestPromise(personChose._id)
+      deleteDespesaAPI
+        .requestPromise(DespesaChose._id)
         .then((info) => {
           console.log("Retornando Info");
           if(info.info.code === 1){
-            setPersonChose(null);
+            setDespesaChose(null);
             setCards([]);
-            getPersonsInfo();
+            getDespesasInfo();
           }  else {
             console.log(info);  
             setIsLoading(false);
-            setPersonChose(null);            
+            setDespesaChose(null);            
           }          
         })
         .catch((info) => {
           console.log(info);
           setIsLoading(false);
-          setPersonChose(null);
+          setDespesaChose(null);
         });
     }
   };
   
 
   useEffect(() => {
-    getPersonsInfo();
+    getDespesasInfo();
   }, []);
 
-  const getPersonsInfo = () => {
+  const getDespesasInfo = () => {
     setIsLoading(true)
-    getPersonAPI
+    getDespesaAPI
       .requestPromise()
       .then((info) => {
         let mountCards = [];
-        info.persons.forEach((person) => {
+        info.Despesas.forEach((Despesa) => {
           setIsLoading(false);
           mountCards.push(
-            <Grid key={person._id} item lg={4} md={6} sm={12}>
+            <Grid key={Despesa._id} item lg={4} md={6} sm={12}>
               <Card className="cardBox">
                 <CardMedia
                   component="img"
                   height="140"
-                  image={person.image}
+                  image={Despesa.image}
                   alt="green iguana"
                 />
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="div">
-                    {person.firstName} {person.lastName}
+                    {Despesa.nome} {Despesa.nome}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {person.jobTitle}
+                    {Despesa.valor}
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button size="small" onClick={() => goToDetail(person)}>Mais informações</Button>
-                  <Button size="small" onClick={() => confirmRemovePerson(person)}>Remover</Button>
+                  <Button size="small" onClick={() => goToCadastro(Despesa)}>Mais informações</Button>
+                  <Button size="small" onClick={() => confirmRemoveDespesa(Despesa)}>Remover</Button>
                 </CardActions>
               </Card>
             </Grid>
@@ -160,20 +160,20 @@ export default function Home() {
       {info}
       <Dialog
         open={isConfirmRemoveDialogOpen}
-        onClose={() => confirmRemovePerson(false)}
+        onClose={() => confirmRemoveDespesa(false)}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">Remover Pessoa</DialogTitle>
+        <DialogTitle id="alert-dialog-title">Remover Despesa</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Deseja realmente remover o usuário{" "}
-            {personChose != null ? personChose.firstName : ""}?
+            Deseja realmente remover despesa{" "}
+            {DespesaChose != null ? DespesaChose.nome : ""}?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => deletePerson(false)}>Não</Button>
-          <Button onClick={() => deletePerson(true)} autoFocus>
+          <Button onClick={() => deleteDespesa(false)}>Não</Button>
+          <Button onClick={() => deleteDespesa(true)} autoFocus>
             Sim
           </Button>
         </DialogActions>

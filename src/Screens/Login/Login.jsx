@@ -136,7 +136,6 @@ return (
               <div className="col-sm-6">
                 {buttonCadastrar}
               </div>
-              
               {alertComp}
             </Form>
           );
